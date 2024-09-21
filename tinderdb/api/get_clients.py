@@ -79,12 +79,11 @@ def query_clients():
             print(f'Authentication failed with status code: {get_proj_key_res.status_code}')
             print('Response Data:')
             print(get_proj_key_res.text)
-        
-        cluster_info = []
 
     ############################################
     # FIND CLUSTERS BASED OFF KEYS
     ############################################
+    cluster_info = []
     for keys in project_keys:
         print("KEYS:", keys)
         
@@ -99,7 +98,21 @@ def query_clients():
             print('Authentication successful!')
             print('Response Data:')
             print(cluster_res.text)
-            cluster_info.append(cluster_res.json())
+            cluster_res_json = cluster_res.json()
+            for cluster in cluster_res_json['results']:
+                print("CLUSTER:", cluster)
+                data_out = {}
+                data_out['id'] = cluster['id']
+                data_out['data_size'] = cluster['diskSizeGB']
+                cluster_info.append(data_out)
+                # for cluster in results['clusters']:
+                #     print("CLUSTER:", cluster)
+                #     data_out = {}
+                #     data_out['id'] = cluster['clusterId']
+                #     data_out['data_size'] = cluster['dataSizeBytes']
+                #     cluster_info.append(data_out)
+                
+            # cluster_info.append(cluster_res.json())
         else:
             print(f'Authentication failed with status code: {cluster_res.status_code}')
             print('Response Data:')
