@@ -9,8 +9,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header>
             <SignedOut>
             <div className="signInButtonWrapper">
-    <SignInButton />
-  </div>
+            <SignInButton />
+            </div>
             </SignedOut>
             <SignedIn>
               <UserButton />
