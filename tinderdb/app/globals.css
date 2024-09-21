@@ -2,26 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+/* globals.css */
+.signInButton {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.signInButton:hover {
+  background-color: #45a049; /* Darker green on hover */
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.signInButtonWrapper {
+  position: absolute; /* Use absolute positioning */
+  top: 10px; /* Adjust as needed */
+  right: 10px; /* Adjust as needed */
+  display: inline-block; /* Keep the button inline */
+  margin: 0; /* Remove margin to avoid affecting positioning */
 }
+
