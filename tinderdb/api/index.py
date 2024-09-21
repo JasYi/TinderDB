@@ -1,5 +1,6 @@
 from flask import Flask
 from api.get_clients import query_clients
+from api.table_actions import del_tab
 
 app = Flask(__name__)
 
@@ -10,3 +11,8 @@ def hello_world():
 @app.route("/api/get_clients")
 def get_clients():
     return query_clients()
+
+@app.route("/api/delete_table")
+def delete_table():
+    del_tab('ajbose02')
+    return "<p>Bye, World!</p>"
