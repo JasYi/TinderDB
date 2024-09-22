@@ -13,30 +13,20 @@ function TinderCards() {
 
   const fetchClusters = async () => {
     try {
-      console.log('Fetching clusters...');
-      const response = await fetch('http://127.0.0.1:5328/api/get_clients');
+      console.log("Fetching clusters...");
+      const response = await fetch("http://127.0.0.1:5328/api/get_clients");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       if (data.clusters && Array.isArray(data.clusters)) {
         // Group collections by clusterId
-        const groupedClusters = data.clusters.reduce((acc, cluster) => {
-          if (!acc[cluster.clusterId]) {
-            acc[cluster.clusterId] = {
-              ...cluster,
-              collections: []
-            };
-          }
-          acc[cluster.clusterId].collections.push(cluster.collection);
-          return acc;
-        }, {});
-        setClusters(Object.values(groupedClusters));
+        setClusters(data.clusters);
       } else {
-        console.error('Unexpected data structure:', data);
+        console.error("Unexpected data structure:", data);
       }
     } catch (error) {
-      console.error('Error fetching clusters:', error.message);
+      console.error("Error fetching clusters:", error.message);
     }
   };
 
@@ -61,20 +51,22 @@ function TinderCards() {
             onCardLeftScreen={() => outOfFrame(cluster.clusterName)}
             style={{
               zIndex: clusters.length - index,
-              transform: `scale(${1 - index * 0.05}) translateY(-${index * 10}px)`
-            }}
-          >
+              transform: `scale(${1 - index * 0.05}) translateY(-${
+                index * 10
+              }px)`,
+            }}>
             <div className={styles.card}>
               <h3>{cluster.clusterName}</h3>
               <p>Database: {cluster.db}</p>
               <p>Size: {cluster.data_size} GB</p>
               <p>Carbon Footprint: {cluster.lb_carbon} lbs CO2</p>
-              <p>Collections:</p>
+              <p>Collection: {cluster.collection}</p>
+              {/* <p>Collections:</p>
               <ul>
                 {cluster.collections.map((collection, index) => (
                   <li key={index}>{collection}</li>
                 ))}
-              </ul>
+              </ul> */}
             </div>
           </TinderCard>
         ))}
