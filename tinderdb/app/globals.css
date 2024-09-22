@@ -11,3 +11,7 @@
   margin: 0;  
 }
 
+.signInButtonWrapper:hover {
+  color: #315e9e;
+}
+

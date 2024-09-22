@@ -1,5 +1,8 @@
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { ClerkProvider, SignInButton, SignOutButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import './globals.css'
+import TinderCards from "../components/TinderCards";
+import SwipeButtons from "../components/SwipeButtons";
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,11 +12,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header>
             <SignedOut>
             <div className="signInButtonWrapper">
-            <SignInButton />
+              <SignInButton />
             </div>
             </SignedOut>
-            <SignedIn>
-              <UserButton />
+            <SignedIn> 
+              <div className="signInButtonWrapper">
+                <SignOutButton />
+              </div>
+              <TinderCards />
+              <SwipeButtons />
             </SignedIn>
           </header>
           <main>{children}</main>
