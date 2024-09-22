@@ -38,9 +38,28 @@ function TinderCards() {
       console.error("Error fetching clusters:", error.message);
     }
   };
-
-  const swiped = (direction, clusterId) => {
-    console.log("Swiped", direction, clusterId);
+  const swiped = async (direction, cluster) => {
+    console.log("Swiped", direction, cluster.clusterId);
+    if (direction === "left") {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5328/api/archive?groupId=${cluster.groupId}&clusterName=${cluster.clusterName}&dbName=${cluster.db}&collectionName=${cluster.collection}`
+        );
+        if (response.ok) {
+          console.log(`Archived collection: ${cluster.collection}`);
+          // Remove the archived cluster from the state
+          setClusters((prevClusters) =>
+            prevClusters.filter((c) => c.clusterId !== cluster.clusterId)
+          );
+        } else {
+          console.error("Failed to archive collection");
+        }
+      } catch (error) {
+        console.error("Error archiving collection:", error);
+      }
+    } else if (direction === "right") {
+      console.log(`Kept collection: ${cluster.collection}`);
+    }
   };
 
   const outOfFrame = (name) => {
@@ -56,7 +75,7 @@ function TinderCards() {
             className={styles.swipe}
             key={cluster.clusterId}
             preventSwipe={["up", "down"]}
-            onSwipe={(dir) => swiped(dir, cluster.clusterId)}
+            onSwipe={(dir) => swiped(dir, cluster)}
             onCardLeftScreen={() => outOfFrame(cluster.clusterName)}
             style={{
               zIndex: clusters.length - index,
@@ -88,18 +107,13 @@ function TinderCards() {
                   </div>
                   <p className="text-gray-700 mb-4">{cluster.llm_bio}</p>
                 </div>
-                {/* <h3>{cluster.clusterName}</h3>
-              <p>Database: {cluster.db}</p>
-              <p>Size: {cluster.data_size} GB</p>
-              <p>Carbon Footprint: {cluster.lb_carbon} lbs CO2</p>
-              <p>Collection: {cluster.collection}</p> */}
-                {/* <p>Collections:</p>
-              <ul>
-                {cluster.collections.map((collection, index) => (
-                  <li key={index}>{collection}</li>
-                ))}
-              </ul> */}
               </div>
+
+              {/* <h3>{cluster.clusterName}</h3>
+             <p>Database: {cluster.db}</p>
+             <p>Size: {cluster.data_size}</p>
+             <p>Carbon Footprint: {cluster.lb_carbon} lbs CO2</p>
+             <p>Collection: {cluster.collection}</p> */}
             </div>
           </TinderCard>
         ))}

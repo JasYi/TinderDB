@@ -11,35 +11,16 @@ import {
 } from "@mui/icons-material";
 import styles from "./SwipeButtons.module.css";
 
-function SwipeButtons() {
-  const childRefs = useRef([]);
-
-  const swipe = (dir) => {
-    // Trigger the swipe action on the top card
-    if (childRefs.current[0]) {
-      childRefs.current[0].swipe(dir);
-    }
-  };
-
+function SwipeButtons({ swipeLeft, swipeRight }) {
   return (
     <div className={styles.swipeButtons}>
-      <IconButton className={styles.swipeButton} onClick={() => swipe("left")}>
-        <Replay fontSize="large" />
-      </IconButton>
-      <IconButton className={styles.swipeButton} onClick={() => swipe("left")}>
+      <IconButton className={styles.swipeButton} onClick={swipeLeft}>
         <Close fontSize="large" />
       </IconButton>
-      <IconButton className={styles.swipeButton} onClick={() => swipe("up")}>
-        <StarRate fontSize="large" />
-      </IconButton>
-      <IconButton className={styles.swipeButton} onClick={() => swipe("right")}>
+      <IconButton className={styles.swipeButton} onClick={swipeRight}>
         <Favorite fontSize="large" />
-      </IconButton>
-      <IconButton className={styles.swipeButton} onClick={() => swipe("down")}>
-        <FlashOn fontSize="large" />
       </IconButton>
     </div>
   );
 }
-
 export default SwipeButtons;
