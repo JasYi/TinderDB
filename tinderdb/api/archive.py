@@ -1,6 +1,7 @@
 import requests
 from requests.auth import HTTPDigestAuth
 from datetime import datetime, timedelta
+from pymongo import MongoClient
 
 def archive_client(groupId, clusterName, pubKey, privKey):
     # Archive the client
@@ -16,20 +17,34 @@ def archive_client(groupId, clusterName, pubKey, privKey):
     
     now = datetime.now().isoformat()
     
+    
+    
     archive_data = {
-        "collName": collection_name,
+        "collName": "comments",
         "criteria": {
-            "type": "DATE",
-            "dateField": now,
-            "expireAfterDays": 0
+            "type": "CUSTOM",
+            "query": "{ _id: { $exists: true } }"
         },
-        "dbName": db_name,
+        "dbName": "sample_mflix",
+        "dataExpirationRule": {
+            "expireAfterDays": 7
+            },
+        "partitionFields": [
+            {
+            "fieldName": "string",
+            "order": 0
+            }
+        ],
         "schedule": {
             "type": "DEFAULT"
         }
     }
+        
+    archive_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{group_id}/clusters/{cluster_name}/onlineArchives'
     
-    archive_res = requests.post(f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{group_id}/clusters/{cluster_name}/onlineArchives', json=archive_data, auth=HTTPDigestAuth(username, password))
+    print(archive_url)
+    archive_res = requests.post(archive_url, json=archive_data, auth=HTTPDigestAuth(username, password))
+
 
     print(archive_res.text)
     return archive_res.text    
