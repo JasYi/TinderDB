@@ -3,17 +3,17 @@ from requests.auth import HTTPDigestAuth
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 
-def archive_client(groupId, clusterName, pubKey, privKey):
+def archive_client(groupId, clusterName, dbName, collectionName, pubKey, privKey):
     # Archive the client
     print("Archiving client")
-    group_id = '66ee585c6e6f185360fe907e'
-    cluster_name = 'Cluster0'
+    group_id = groupId
+    cluster_name = clusterName
     username = 'lzfpelic'
     password = '00766fa9-d349-4f87-9b85-750bd41b86b6'
     
-    collection_name = 'comments'
+    collection_name = collectionName
     
-    db_name = 'sample_mflix'
+    db_name = dbName
     
     now = datetime.now().isoformat()
     
