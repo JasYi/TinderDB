@@ -14,3 +14,25 @@
 .headerIcon {
   padding: 10px;
 } 
+
+.authLink {
+  margin-left: 10px;
+  color: #915dd1;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signOutButton {
+  margin-left: 10px;
+  background-color: #915dd1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.signOutButton:hover {
+  background-color: #7641a8;
+}
