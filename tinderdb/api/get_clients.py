@@ -3,6 +3,8 @@ from requests.auth import HTTPDigestAuth
 
 from urllib.request import urlopen
 import re as r
+from pymongo import MongoClient
+
 
 def getIP():
     d = str(urlopen('http://checkip.dyndns.com/').read())
@@ -129,21 +131,54 @@ def query_clients():
             proj_id = results['groupId']
             for cluster in results['clusters']:
                 print("CLUSTER:", cluster)
-                data_out = {}
-                data_out['id'] = cluster['clusterId']
+                cluster_id = cluster['clusterId']
                 # data_out['data_size'] = cluster['dataSizeBytes']
                 cluster_name = cluster['name']
-                data_out['name'] = cluster_name
-                data_out['groupId'] = proj_id
                 
                 disk_size_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}'
                 print(disk_size_url)
                 disk_size_req = requests.get(disk_size_url, auth=HTTPDigestAuth(username, password))
                 print(disk_size_req.text)
-                data_out['data_size'] = disk_size_req.json()['diskSizeGB']
-                data_out['lb_carbon'] = data_out['data_size'] * 4
+                data_size = disk_size_req.json()['diskSizeGB']
+                lb_carbon = data_size * 4
+
+                client = MongoClient(f"mongodb+srv://jasonyi2015:tinderdb@{cluster_name}.ur5xy.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true&appName={cluster_name}")
+                database_names = client.list_database_names()
+                for db_name in database_names:
+                    if db_name in ['admin', 'local', 'config']:
+                        continue
+                    db = client.get_database(db_name)
+                    collection_names = db.list_collection_names()
+                    print("DB:", db_name)
+                    print("COLLECTIONS:", collection_names)
+                    for coll_name in collection_names:
+                        data_out = {}
+                        data_out['name'] = cluster_name
+                        data_out['groupId'] = proj_id
+                        data_out['clusterId'] = cluster_id
+                        data_out['clusterName'] = cluster_name
+                        data_out['groupId'] = proj_id
+                        data_out['collection'] = coll_name
+                        data_out['db'] = db_name
+                        data_out['data_size'] = data_size
+                        data_out['lb_carbon'] = lb_carbon
+                        cluster_info.append(data_out)
+                # collections_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/globalWrites'
+                # collections_res = requests.get(collections_url, auth=HTTPDigestAuth(username, password))
                 
-                cluster_info.append(data_out)
+                # collections_json = collections_res.json()
+                
+                # print("COLLECTIONS:", collections_json)
+                
+                # for collection in collections_json['managedNamespaces']:
+                #     data_out['clusterId'] = cluster_id
+                #     data_out['clusterName'] = cluster_name
+                #     data_out['groupId'] = proj_id
+                #     data_out['collection'] = collection['collection']
+                #     data_out['db'] = collection['db']
+                #     data_out['data_size'] = data_size
+                #     data_out['lb_carbon'] = lb_carbon
+                #     cluster_info.append(data_out)
             # for cluster in results['clusters']:
             #     print("CLUSTER:", cluster)
             #     data_out = {}
