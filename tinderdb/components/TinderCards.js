@@ -1,22 +1,47 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TinderCard from "react-tinder-card";
 import styles from "./TinderCards.module.css";
 
 function TinderCards() {
-  const [people] = useState([
-    {
-      name: "Elon Musk",
-      url: "https://media.gettyimages.com/photos/of-tesla-and-space-x-elon-musk-attends-the-2015-vanity-fair-oscar-picture-id464172224?k=6&m=464172224&s=612x612&w=0&h=M9Wf9-mcTJBLRWKFhAX_QGVAPXogzxyvZeCiIV5O3pw=",
-    },
-    {
-      name: "Jeff Bezos",
-      url: "https://media.gettyimages.com/photos/amazon-ceo-jeff-bezos-founder-of-space-venture-blue-origin-and-owner-picture-id1036094130?k=6&m=1036094130&s=612x612&w=0&h=3tKtZs6_SIXFZ2sdRUB4LjAf_GlfCMekP2Morwkt5EM=",
-    },
-  ]);
+  const [clusters, setClusters] = useState([]);
 
-  const swiped = (direction, nameToDelete) => {
-    console.log("Swiped", direction, nameToDelete);
+  useEffect(() => {
+    // Fetch cluster data
+    fetchClusters();
+  }, []);
+
+  const fetchClusters = async () => {
+    try {
+      console.log('Fetching clusters...');
+      const response = await fetch('http://127.0.0.1:5328/api/get_clients');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.clusters && Array.isArray(data.clusters)) {
+        // Group collections by clusterId
+        const groupedClusters = data.clusters.reduce((acc, cluster) => {
+          if (!acc[cluster.clusterId]) {
+            acc[cluster.clusterId] = {
+              ...cluster,
+              collections: []
+            };
+          }
+          acc[cluster.clusterId].collections.push(cluster.collection);
+          return acc;
+        }, {});
+        setClusters(Object.values(groupedClusters));
+      } else {
+        console.error('Unexpected data structure:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching clusters:', error.message);
+    }
+  };
+
+  const swiped = (direction, clusterId) => {
+    console.log("Swiped", direction, clusterId);
   };
 
   const outOfFrame = (name) => {
@@ -25,18 +50,31 @@ function TinderCards() {
 
   return (
     <div className={styles.tinderCards}>
+      <div className={styles.backgroundImage}></div>
       <div className={styles.cardContainer}>
-        {people.map((person) => (
+        {clusters.map((cluster, index) => (
           <TinderCard
             className={styles.swipe}
-            key={person.name}
+            key={cluster.clusterId}
             preventSwipe={["up", "down"]}
-            onSwipe={(dir) => swiped(dir, person.name)}
-            onCardLeftScreen={() => outOfFrame(person.name)}>
-            <div
-              style={{ backgroundImage: `url(${person.url})` }}
-              className={styles.card}>
-              <h3>{person.name}</h3>
+            onSwipe={(dir) => swiped(dir, cluster.clusterId)}
+            onCardLeftScreen={() => outOfFrame(cluster.clusterName)}
+            style={{
+              zIndex: clusters.length - index,
+              transform: `scale(${1 - index * 0.05}) translateY(-${index * 10}px)`
+            }}
+          >
+            <div className={styles.card}>
+              <h3>{cluster.clusterName}</h3>
+              <p>Database: {cluster.db}</p>
+              <p>Size: {cluster.data_size} GB</p>
+              <p>Carbon Footprint: {cluster.lb_carbon} lbs CO2</p>
+              <p>Collections:</p>
+              <ul>
+                {cluster.collections.map((collection, index) => (
+                  <li key={index}>{collection}</li>
+                ))}
+              </ul>
             </div>
           </TinderCard>
         ))}

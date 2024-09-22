@@ -11,7 +11,7 @@ function Header() {
 
   const handleSignOut = async () => {
     await signOut({
-      redirectUrl: "https://helpful-dassie-78.clerk.accounts.dev/sign-in",
+      redirectUrl: "https://helpful-dassie-78.clerk.accounts.dev/",
     });
   };
   return (

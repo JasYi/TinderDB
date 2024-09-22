@@ -5,7 +5,7 @@ from flask_cors import CORS, cross_origin
 from table_actions import del_tab
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 @app.route("/api/python")
 def hello_world():
