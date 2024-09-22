@@ -25,7 +25,7 @@ def call_llm(collection_info, collection_name, db_name):
         },
         {
             "role": "user",
-            "content": f"Create a witty Tinder-style profile bio for this collection named {collection_name} in the database {db_name}. This is the first document in the collection: " + str(collection_info)
+            "content": f"Create a witty Tinder-style profile bio for this collection named {collection_name} in the database {db_name}. These are the keys of the first document in the collection: " + str(collection_info)
         }
         ],
         "model": "yi-jason11/yi-jason11-gemma2-9b-it",
@@ -203,10 +203,11 @@ def query_clients():
                             continue
                         col_stats = db.command("collStats", coll_name)
                         collection = db[coll_name]
-                        first_two_docs = collection.find().limit(1)
-                        print("FIRST TWO:", first_two_docs)
-                        llm_res = call_llm(first_two_docs, coll_name, db_name)
-                        # print("LLM RES:", llm_res)
+                        first_two_docs = list(collection.find().limit(1))
+                        first_two_keys = list(first_two_docs[0].keys())
+                        print("FIRST TWO:", first_two_keys)
+                        llm_res = call_llm(first_two_keys, coll_name, db_name)
+                        print("LLM RES:", llm_res.keys())
                         llm_bio = llm_res['choices'][0]['message']['content']
                         bytes_data = ((col_stats['totalSize']) * col_stats['scaleFactor']) + db_size
                         usage_data = format_bytes(bytes_data)
@@ -222,6 +223,7 @@ def query_clients():
                         data_out['data_size'] = usage_data
                         data_out['lb_carbon'] = total_lb
                         data_out['llm_bio'] = llm_bio
+                        data_out['first_doc'] = first_two_keys
                         cluster_info.append(data_out)
                 # collections_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/globalWrites'
                 # collections_res = requests.get(collections_url, auth=HTTPDigestAuth(username, password))

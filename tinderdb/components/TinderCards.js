@@ -10,7 +10,11 @@ import {
   GraduationCap,
   ChevronDown,
   ChevronUp,
+  database,
+  Database,
+  Fuel,
 } from "lucide-react";
+import Image from "next/image";
 
 function TinderCards() {
   const [clusters, setClusters] = useState([]);
@@ -19,6 +23,22 @@ function TinderCards() {
     // Fetch cluster data
     fetchClusters();
   }, []);
+
+  const findBreakdown = (weight) => {
+    // mouse 0.06
+    // chicken 5
+    // hedgehog 1 lb
+    // rabbit 2 lb
+    var rolling_weight = weight;
+    var num_chicken = Math.floor(rolling_weight / 5);
+    rolling_weight = rolling_weight % 5;
+    var num_rabbit = Math.floor(rolling_weight / 2);
+    rolling_weight = rolling_weight % 2;
+    var num_hedgehog = Math.floor(rolling_weight / 1);
+    rolling_weight = rolling_weight % 1;
+    var num_mouse = Math.floor(rolling_weight / 0.06);
+    return [num_chicken, num_rabbit, num_hedgehog, num_mouse];
+  };
 
   const fetchClusters = async () => {
     try {
@@ -66,6 +86,31 @@ function TinderCards() {
     console.log("Out of frame:", name);
   };
 
+  const images = ["/chicken.png", "/rabbit.png", "/hedgehog.png", "/mouse.png"];
+
+  const renderImagesByFrequency = (imageArray, freqArray) => {
+    return imageArray.map((image, imageIndex) => {
+      const imageCount = freqArray[imageIndex]; // Get the frequency for the current image
+      const imageElements = [];
+
+      // Loop to render 'imageCount' number of this image
+      for (let i = 0; i < imageCount; i++) {
+        imageElements.push(
+          <div key={`${image}-${i}`} className="image-wrapper">
+            <Image
+              src={image}
+              alt={`Image ${imageIndex + 1}`}
+              width={50}
+              height={50}
+            />
+          </div>
+        );
+      }
+
+      return imageElements; // Return an array of images for each frequency
+    });
+  };
+
   return (
     <div className={styles.tinderCards}>
       <div className={styles.backgroundImage}></div>
@@ -84,36 +129,42 @@ function TinderCards() {
               }px)`,
             }}>
             <div className={styles.card}>
-              <div className="align-end size-full flex">
+              <div className="flex items-end w-full h-full pb-3">
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
                   <h2 className="text-white text-2xl font-bold">
                     {cluster.db}.{cluster.collection}
                   </h2>
                 </div>
-                <div className="p-4 align-bottom">
+                <div className="p-4">
+                  <div className="flex flex-wrap pb-5">
+                    <h2 className="w-full">Archive and save</h2>
+                    {renderImagesByFrequency(
+                      images,
+                      findBreakdown(cluster.lb_carbon)
+                    )}
+                    <h2 className="w-full">worth of emissions.</h2>
+                  </div>
                   <div className="space-y-2">
                     <div className="flex items-center text-gray-600">
-                      <MapPin className="w-5 h-5 mr-2" />
+                      <Database className="w-5 h-5 mr-2" />
                       <span>{cluster.data_size}</span>
                     </div>
                     <div className="flex items-center text-gray-600">
-                      <Briefcase className="w-5 h-5 mr-2" />
-                      <span>{cluster.lb_carbon}</span>
+                      <Fuel className="w-5 h-5 mr-2" />
+                      <span>{cluster.lb_carbon.toFixed(2)} lb CO2</span>
                     </div>
                     <div className="flex items-center text-gray-600">
                       <GraduationCap className="w-5 h-5 mr-2" />
                       <span>{cluster.clusterName}</span>
                     </div>
+                    {/* <div className="flex items-center text-gray-600">
+                      <GraduationCap className="w-5 h-5 mr-2" />
+                      <span>{cluster.first_doc.join(", ")}</span>
+                    </div> */}
                   </div>
                   <p className="text-gray-700 mb-4">{cluster.llm_bio}</p>
                 </div>
               </div>
-
-              {/* <h3>{cluster.clusterName}</h3>
-             <p>Database: {cluster.db}</p>
-             <p>Size: {cluster.data_size}</p>
-             <p>Carbon Footprint: {cluster.lb_carbon} lbs CO2</p>
-             <p>Collection: {cluster.collection}</p> */}
             </div>
           </TinderCard>
         ))}
