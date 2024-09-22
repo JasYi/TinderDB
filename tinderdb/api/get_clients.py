@@ -141,6 +141,7 @@ def query_clients():
                 disk_size_req = requests.get(disk_size_url, auth=HTTPDigestAuth(username, password))
                 print(disk_size_req.text)
                 data_out['data_size'] = disk_size_req.json()['diskSizeGB']
+                data_out['lb_carbon'] = data_out['data_size'] * 4
                 
                 cluster_info.append(data_out)
             # for cluster in results['clusters']:
