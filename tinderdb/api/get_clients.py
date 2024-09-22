@@ -142,6 +142,17 @@ def query_clients():
                 data_size = disk_size_req.json()['diskSizeGB']
                 lb_carbon = data_size * 4
 
+
+                def format_bytes(bytes_size):
+                    """
+                    Helper function to convert bytes to a more readable format.
+                    """
+                    for unit in ['B', 'KB', 'MB', 'GB', 'TB', 'PB']:
+                        if bytes_size < 1024:
+                            return f"{bytes_size:.2f} {unit}"
+                        bytes_size /= 1024
+                    return f"{bytes_size:.2f} EB"
+
                 client = MongoClient(f"mongodb+srv://jasonyi2015:tinderdb@{cluster_name}.ur5xy.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true&appName={cluster_name}")
                 database_names = client.list_database_names()
                 for db_name in database_names:
@@ -151,7 +162,16 @@ def query_clients():
                     collection_names = db.list_collection_names()
                     print("DB:", db_name)
                     print("COLLECTIONS:", collection_names)
+                    db_stats = db.command("dbStats")
+                    print("DB STATS:", db_stats)
+                    db_size = db_stats['fsUsedSize'] / len(collection_names)
+                    print("DB SIZE:", db_size)
                     for coll_name in collection_names:
+                        col_stats = db.command("collStats", coll_name)
+                        print("COLLECTION STATS:", col_stats)
+                        bytes_data = ((col_stats['totalSize']) * col_stats['scaleFactor']) + db_size
+                        usage_data = format_bytes(bytes_data)
+                        total_lb = bytes_data / 1000000000 * 4
                         data_out = {}
                         data_out['name'] = cluster_name
                         data_out['groupId'] = proj_id
@@ -160,8 +180,8 @@ def query_clients():
                         data_out['groupId'] = proj_id
                         data_out['collection'] = coll_name
                         data_out['db'] = db_name
-                        data_out['data_size'] = data_size
-                        data_out['lb_carbon'] = lb_carbon
+                        data_out['data_size'] = usage_data
+                        data_out['lb_carbon'] = total_lb
                         cluster_info.append(data_out)
                 # collections_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/globalWrites'
                 # collections_res = requests.get(collections_url, auth=HTTPDigestAuth(username, password))
