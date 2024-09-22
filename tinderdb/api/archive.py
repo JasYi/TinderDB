@@ -3,7 +3,7 @@ from requests.auth import HTTPDigestAuth
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 
-def archive_client(groupId, clusterName, dbName, collectionName, pubKey, privKey):
+def archive_client(groupId, clusterName, dbName, collectionName):
     # Archive the client
     print("Archiving client")
     group_id = groupId
@@ -20,12 +20,12 @@ def archive_client(groupId, clusterName, dbName, collectionName, pubKey, privKey
     
     
     archive_data = {
-        "collName": "comments",
+        "collName": collection_name,
         "criteria": {
             "type": "CUSTOM",
             "query": "{ _id: { $exists: true } }"
         },
-        "dbName": "sample_mflix",
+        "dbName": db_name,
         "dataExpirationRule": {
             "expireAfterDays": 7
             },

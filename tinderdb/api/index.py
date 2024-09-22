@@ -26,6 +26,4 @@ def archive():
     clusterName = request.args.get('clusterName')
     dbName = request.args.get('dbName')
     collectionName = request.args.get('collectionName')
-    privKey = request.args.get('privKey')
-    pubKey = request.args.get('pubKey')
-    return archive_client(groupId, clusterName, dbName, collectionName, pubKey, privKey)
+    return archive_client(groupId, clusterName, dbName, collectionName)
