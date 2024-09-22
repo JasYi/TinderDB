@@ -1,6 +1,7 @@
 from flask import Flask
 from api.get_clients import query_clients
 from flask_cors import CORS, cross_origin
+from table_actions import del_tab
 
 app = Flask(__name__)
 CORS(app)
@@ -16,5 +17,4 @@ def get_clients():
 
 @app.route("/api/delete_table")
 def delete_table():
-    del_tab('ajbose02')
-    return "<p>Bye, World!</p>"
+    return del_tab("sample_mflix")
