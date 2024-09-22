@@ -2,6 +2,15 @@
 import React, { useState, useEffect } from "react";
 import TinderCard from "react-tinder-card";
 import styles from "./TinderCards.module.css";
+import {
+  Heart,
+  X,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 function TinderCards() {
   const [clusters, setClusters] = useState([]);
@@ -56,17 +65,41 @@ function TinderCards() {
               }px)`,
             }}>
             <div className={styles.card}>
-              <h3>{cluster.clusterName}</h3>
+              <div className="align-end size-full flex">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                  <h2 className="text-white text-2xl font-bold">
+                    {cluster.db}.{cluster.collection}
+                  </h2>
+                </div>
+                <div className="p-4 align-bottom">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-gray-600">
+                      <MapPin className="w-5 h-5 mr-2" />
+                      <span>{cluster.data_size}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Briefcase className="w-5 h-5 mr-2" />
+                      <span>{cluster.lb_carbon}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <GraduationCap className="w-5 h-5 mr-2" />
+                      <span>{cluster.clusterName}</span>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">{cluster.llm_bio}</p>
+                </div>
+                {/* <h3>{cluster.clusterName}</h3>
               <p>Database: {cluster.db}</p>
               <p>Size: {cluster.data_size} GB</p>
               <p>Carbon Footprint: {cluster.lb_carbon} lbs CO2</p>
-              <p>Collection: {cluster.collection}</p>
-              {/* <p>Collections:</p>
+              <p>Collection: {cluster.collection}</p> */}
+                {/* <p>Collections:</p>
               <ul>
                 {cluster.collections.map((collection, index) => (
                   <li key={index}>{collection}</li>
                 ))}
               </ul> */}
+              </div>
             </div>
           </TinderCard>
         ))}

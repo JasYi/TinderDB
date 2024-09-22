@@ -206,7 +206,7 @@ def query_clients():
                         first_two_docs = collection.find().limit(1)
                         print("FIRST TWO:", first_two_docs)
                         llm_res = call_llm(first_two_docs, coll_name, db_name)
-                        print("LLM RES:", llm_res)
+                        # print("LLM RES:", llm_res)
                         llm_bio = llm_res['choices'][0]['message']['content']
                         bytes_data = ((col_stats['totalSize']) * col_stats['scaleFactor']) + db_size
                         usage_data = format_bytes(bytes_data)
@@ -251,7 +251,7 @@ def query_clients():
         print(f'Authentication failed with status code: {cluster_res.status_code}')
         print('Response Data:')
         print(cluster_res.text)
-    print(cluster_info)
+    # print(cluster_info)
     data_out = {
         "pubKey": username,
         "privKey": password,
