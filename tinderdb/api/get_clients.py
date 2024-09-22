@@ -21,6 +21,8 @@ def query_clients():
     
     org_info = requests.get(get_org_url, auth=HTTPDigestAuth(username, password))
     
+    print(org_info.text)
+    
     org_id = org_info.json()['results'][0]['id']
     print("CRED ID",org_id)
     
@@ -124,12 +126,22 @@ def query_clients():
         print(cluster_res.text)
         cluster_res_json = cluster_res.json()
         for results in cluster_res_json['results']:
+            proj_id = results['groupId']
             for cluster in results['clusters']:
                 print("CLUSTER:", cluster)
                 data_out = {}
                 data_out['id'] = cluster['clusterId']
-                data_out['data_size'] = cluster['dataSizeBytes']
-                data_out['name'] = cluster['name']
+                # data_out['data_size'] = cluster['dataSizeBytes']
+                cluster_name = cluster['name']
+                data_out['name'] = cluster_name
+                data_out['groupId'] = proj_id
+                
+                disk_size_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}'
+                print(disk_size_url)
+                disk_size_req = requests.get(disk_size_url, auth=HTTPDigestAuth(username, password))
+                print(disk_size_req.text)
+                data_out['data_size'] = disk_size_req.json()['diskSizeGB']
+                
                 cluster_info.append(data_out)
             # for cluster in results['clusters']:
             #     print("CLUSTER:", cluster)
