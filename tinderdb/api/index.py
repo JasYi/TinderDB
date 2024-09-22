@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, request
 from api.get_clients import query_clients
+from api.archive import archive_client
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -18,3 +19,11 @@ def get_clients():
 def delete_table():
     del_tab('ajbose02')
     return "<p>Bye, World!</p>"
+
+@app.route("/api/archive")
+def archive():
+    groupId = request.args.get('groupId')
+    clusterName = request.args.get('clusterName')
+    privKey = request.args.get('privKey')
+    pubKey = request.args.get('pubKey')
+    return archive_client(groupId, clusterName, pubKey, privKey)
