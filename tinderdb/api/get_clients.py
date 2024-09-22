@@ -6,6 +6,43 @@ import re as r
 from pymongo import MongoClient
 
 
+def call_llm(collection_info, collection_name, db_name):
+    import json
+    import requests
+
+    stream = False
+    url = "https://proxy.tune.app/chat/completions"
+    headers = {
+        "Authorization": "sk-tune-C9yHcBZABiINkPNonPmTbwkaRrAjDELIUhp",
+        "Content-Type": "application/json",
+    }
+    data = {
+    "temperature": 0.9,
+        "messages":  [
+        {
+            "role": "system",
+            "content": "You take in the first document from a MongoDB collection and your purpose is to summarize the purpose of the collection in an informative way and to highlight why it deserves to stay in the database. Your goal is to generate a humorous, witty, concise, and informative Tinder-style profile bio for the collection. Make your response casual and trendy, drawing upon recent information and trends. The response should also rizz the reader of the prompt. If the user swipes right the collection is kept and if the user swipes left the collection is archived. Include information about the type of data in the collection, the structure, and its relationships. Keep your response to under 20 words and only respond with the bio and nothing else."
+        },
+        {
+            "role": "user",
+            "content": f"Create a witty Tinder-style profile bio for this collection named {collection_name} in the database {db_name}. This is the first document in the collection: " + str(collection_info)
+        }
+        ],
+        "model": "yi-jason11/yi-jason11-gemma2-9b-it",
+        "stream": stream,
+        "frequency_penalty":  0.2,
+        "max_tokens": 400
+    }
+    response = requests.post(url, headers=headers, json=data)
+    if stream:
+        for line in response.iter_lines():
+            if line:
+                l = line[6:]
+                if l != b'[DONE]':
+                    print(json.loads(l))
+    else:
+        return response.json()
+
 def getIP():
     d = str(urlopen('http://checkip.dyndns.com/').read())
 
@@ -134,12 +171,10 @@ def query_clients():
                 get_archive_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/onlineArchives'
                 curr_archives_res = requests.get(get_archive_url, auth=HTTPDigestAuth(username, password))
                 curr_archives_json = curr_archives_res.json()
-                print("ARCHIVES:", get_archive_url)
                 archived_elems = [[name['clusterName'], name['collName'], name['dbName']] for name in curr_archives_json['results']]
                 
                 
                 
-                print("CLUSTER:", cluster)
                 cluster_id = cluster['clusterId']
                 # data_out['data_size'] = cluster['dataSizeBytes']
 
@@ -161,17 +196,18 @@ def query_clients():
                         continue
                     db = client.get_database(db_name)
                     collection_names = db.list_collection_names()
-                    print("DB:", db_name)
-                    print("COLLECTIONS:", collection_names)
                     db_stats = db.command("dbStats")
-                    print("DB STATS:", db_stats)
                     db_size = db_stats['fsUsedSize'] / len(collection_names)
-                    print("DB SIZE:", db_size)
                     for coll_name in collection_names:
                         if [cluster_name, coll_name, db_name] in archived_elems:
                             continue
                         col_stats = db.command("collStats", coll_name)
-                        print("COLLECTION STATS:", col_stats)
+                        collection = db[coll_name]
+                        first_two_docs = collection.find().limit(1)
+                        print("FIRST TWO:", first_two_docs)
+                        llm_res = call_llm(first_two_docs, coll_name, db_name)
+                        print("LLM RES:", llm_res)
+                        llm_bio = llm_res['choices'][0]['message']['content']
                         bytes_data = ((col_stats['totalSize']) * col_stats['scaleFactor']) + db_size
                         usage_data = format_bytes(bytes_data)
                         total_lb = bytes_data / 1000000000 * 4
@@ -185,6 +221,7 @@ def query_clients():
                         data_out['db'] = db_name
                         data_out['data_size'] = usage_data
                         data_out['lb_carbon'] = total_lb
+                        data_out['llm_bio'] = llm_bio
                         cluster_info.append(data_out)
                 # collections_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/globalWrites'
                 # collections_res = requests.get(collections_url, auth=HTTPDigestAuth(username, password))
