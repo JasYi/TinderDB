@@ -130,17 +130,18 @@ def query_clients():
         for results in cluster_res_json['results']:
             proj_id = results['groupId']
             for cluster in results['clusters']:
+                cluster_name = cluster['name']
+                get_archive_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/onlineArchives'
+                curr_archives_res = requests.get(get_archive_url, auth=HTTPDigestAuth(username, password))
+                curr_archives_json = curr_archives_res.json()
+                print("ARCHIVES:", get_archive_url)
+                archived_elems = [[name['clusterName'], name['collName'], name['dbName']] for name in curr_archives_json['results']]
+                
+                
+                
                 print("CLUSTER:", cluster)
                 cluster_id = cluster['clusterId']
                 # data_out['data_size'] = cluster['dataSizeBytes']
-                cluster_name = cluster['name']
-                
-                disk_size_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}'
-                print(disk_size_url)
-                disk_size_req = requests.get(disk_size_url, auth=HTTPDigestAuth(username, password))
-                print(disk_size_req.text)
-                data_size = disk_size_req.json()['diskSizeGB']
-                lb_carbon = data_size * 4
 
 
                 def format_bytes(bytes_size):
@@ -167,6 +168,8 @@ def query_clients():
                     db_size = db_stats['fsUsedSize'] / len(collection_names)
                     print("DB SIZE:", db_size)
                     for coll_name in collection_names:
+                        if [cluster_name, coll_name, db_name] in archived_elems:
+                            continue
                         col_stats = db.command("collStats", coll_name)
                         print("COLLECTION STATS:", col_stats)
                         bytes_data = ((col_stats['totalSize']) * col_stats['scaleFactor']) + db_size
