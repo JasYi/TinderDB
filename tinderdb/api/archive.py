@@ -8,8 +8,8 @@ def archive_client(groupId, clusterName, dbName, collectionName):
     print("Archiving client")
     group_id = groupId
     cluster_name = clusterName
-    username = 'lzfpelic'
-    password = '00766fa9-d349-4f87-9b85-750bd41b86b6'
+    username = 'lzfpelic' # deprecared credentials
+    password = '00766fa9-d349-4f87-9b85-750bd41b86b6' # deprecated credientials
     
     collection_name = collectionName
     

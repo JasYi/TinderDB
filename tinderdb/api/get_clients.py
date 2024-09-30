@@ -13,7 +13,7 @@ def call_llm(collection_info, collection_name, db_name):
     stream = False
     url = "https://proxy.tune.app/chat/completions"
     headers = {
-        "Authorization": "sk-tune-C9yHcBZABiINkPNonPmTbwkaRrAjDELIUhp",
+        "Authorization": "sk-tune-C9yHcBZABiINkPNonPmTbwkaRrAjDELIUhp", # deprecated key
         "Content-Type": "application/json",
     }
     data = {
@@ -52,8 +52,8 @@ def query_clients():
     ############################################
     # DUMMY USERNAME AND PASSWORD CHANGE LATER
     ############################################
-    username = 'lzfpelic'
-    password = '00766fa9-d349-4f87-9b85-750bd41b86b6'
+    username = 'lzfpelic' # deprecated
+    password = '00766fa9-d349-4f87-9b85-750bd41b86b6' # deprecated
 
     # get organizations
     get_org_url = 'https://cloud.mongodb.com/api/atlas/v1.0/orgs'
@@ -189,7 +189,8 @@ def query_clients():
                         bytes_size /= 1024
                     return f"{bytes_size:.2f} EB"
 
-                client = MongoClient(f"mongodb+srv://jasonyi2015:tinderdb@{cluster_name}.ur5xy.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true&appName={cluster_name}")
+                # deprecated credentials
+                client = MongoClient(f"mongodb+srv://jasonyi2015:tinderdb@{cluster_name}.ur5xy.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true&appName={cluster_name}") 
                 database_names = client.list_database_names()
                 for db_name in database_names:
                     if db_name in ['admin', 'local', 'config']:
@@ -204,11 +205,11 @@ def query_clients():
                         col_stats = db.command("collStats", coll_name)
                         collection = db[coll_name]
                         first_two_docs = list(collection.find().limit(1))
-                        first_two_keys = list(first_two_docs[0].keys())
+                        first_two_keys = list(first_two_docs)
                         print("FIRST TWO:", first_two_keys)
                         llm_res = call_llm(first_two_keys, coll_name, db_name)
                         print("LLM RES:", llm_res.keys())
-                        llm_bio = llm_res['choices'][0]['message']['content']
+                        llm_bio = llm_res['choices'][0]['message']['content'] if 'choices' in llm_res.keys() else ""
                         bytes_data = ((col_stats['totalSize']) * col_stats['scaleFactor']) + db_size
                         usage_data = format_bytes(bytes_data)
                         total_lb = bytes_data / 1000000000 * 4
@@ -223,7 +224,6 @@ def query_clients():
                         data_out['data_size'] = usage_data
                         data_out['lb_carbon'] = total_lb
                         data_out['llm_bio'] = llm_bio
-                        data_out['first_doc'] = first_two_keys
                         cluster_info.append(data_out)
                 # collections_url = f'https://cloud.mongodb.com/api/atlas/v1.0/groups/{proj_id}/clusters/{cluster_name}/globalWrites'
                 # collections_res = requests.get(collections_url, auth=HTTPDigestAuth(username, password))

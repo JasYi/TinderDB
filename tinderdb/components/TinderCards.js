@@ -131,7 +131,7 @@ function TinderCards() {
             <div className={styles.card}>
               <div className="flex items-end w-full h-full pb-3">
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                  <h2 className="text-white text-2xl font-bold">
+                  <h2 className="text-white text-xl font-bold">
                     {cluster.db}.{cluster.collection}
                   </h2>
                 </div>
